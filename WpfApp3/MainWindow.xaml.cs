@@ -29,7 +29,7 @@ namespace WpfApp3
         internal BitmapSource orirginalSourceBitmap = null;
         //internal BitmapSource transformedSourceBitmap = null;
         internal BitmapSource displayedSourceBitmap = null;
-        public static UInt32[,] pixel;
+        //public static UInt32[,] pixel;
         public static Bitmap bitmap = null;
         //public BlurEffect myBlur = new BlurEffect();
 
@@ -256,7 +256,7 @@ namespace WpfApp3
 
             for (int h = 0; h < height; h++)
                 for (int w = 0; w < width; w++)
-                    pixel[h, w] = BitConverter.ToUInt32(bytes, i);
+                    pixels[h, w] = BitConverter.ToUInt32(bytes, i);
 
             for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
             {
