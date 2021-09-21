@@ -234,15 +234,6 @@ namespace WpfApp3
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
 
-
-
-            //bitmap = ConvertToBitmap(orirginalSourceBitmap);
-
-            //pixel = new UInt32[bitmap.Height, bitmap.Width];
-            //for (int y = 0; y < bitmap.Height; y++)
-            //    for (int x = 0; x < bitmap.Width; x++)
-            //        pixel[y, x] = (UInt32)(bitmap.GetPixel(x, y).ToArgb());
-
             int height = displayedSourceBitmap.PixelHeight;
             int width = displayedSourceBitmap.PixelWidth;
 
@@ -258,6 +249,42 @@ namespace WpfApp3
             for (int h = 0; h < height; h++)
                 for (int w = 0, i = 0; w < width; w++, i += bytesPerPixel)
                     pixels[h, w] = BitConverter.ToUInt32(bytes, i);
+
+            // ---------------------------------------------------------------------------------
+
+            int i, j, k, m, gap = (int)(N / 2);
+            int tmpH = H + 2 * gap, tmpW = W + 2 * gap;
+            UInt32[,] tmppixel = new UInt32[tmpH, tmpW];
+            UInt32[,] newpixel = new UInt32[H, W];
+            //заполнение временного расширенного изображения
+            //углы
+            for (i = 0; i < gap; i++)
+                for (j = 0; j < gap; j++)
+                {
+                    tmppixel[i, j] = pixel[0, 0];
+                    tmppixel[i, tmpW - 1 - j] = pixel[0, W - 1];
+                    tmppixel[tmpH - 1 - i, j] = pixel[H - 1, 0];
+                    tmppixel[tmpH - 1 - i, tmpW - 1 - j] = pixel[H - 1, W - 1];
+                }
+            //крайние левая и правая стороны
+            for (i = gap; i < tmpH - gap; i++)
+                for (j = 0; j < gap; j++)
+                {
+                    tmppixel[i, j] = pixel[i - gap, j];
+                    tmppixel[i, tmpW - 1 - j] = pixel[i - gap, W - 1 - j];
+                }
+            //крайние верхняя и нижняя стороны
+            for (i = 0; i < gap; i++)
+                for (j = gap; j < tmpW - gap; j++)
+                {
+                    tmppixel[i, j] = pixel[i, j - gap];
+                    tmppixel[tmpH - 1 - i, j] = pixel[H - 1 - i, j - gap];
+                }
+            //центр
+            for (i = 0; i < H; i++)
+                for (j = 0; j < W; j++)
+                    tmppixel[i + gap, j + gap] = pixel[i, j];
+
 
         }
         //public static Bitmap ConvertToBitmap(BitmapSource bitmapSource)

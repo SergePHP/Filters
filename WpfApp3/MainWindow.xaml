@@ -27,7 +27,7 @@
             <Button x:Name="mirrorv" Content="Отразить вертикально" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Mirror_Click" />
             <Button x:Name="mirrorg" Content="Отразить горизонтально" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Mirror_Click" />
             <Button x:Name="inversion" Content="Инверсия" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Inversion_Click" />
-            <Button x:Name="blur" Content="Размытие" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Blur_Click" />
+            <Button x:Name="blurEffect" Content="Размытие" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Blur_Click" />
             <Image x:Name="image" />
         </DockPanel >
         <Label x:Name="label" Content="Нет рисунка" HorizontalAlignment="Center" VerticalAlignment="Center" />
