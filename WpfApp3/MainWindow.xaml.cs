@@ -253,18 +253,11 @@ namespace WpfApp3
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
 
             UInt32[,] pixels = new UInt32[height, width];
+            UInt32[,] transformedPixels = new UInt32[height, width];
 
             for (int h = 0; h < height; h++)
-                for (int w = 0; w < width; w++)
+                for (int w = 0, i = 0; w < width; w++, i += bytesPerPixel)
                     pixels[h, w] = BitConverter.ToUInt32(bytes, i);
-
-            for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
-            {
-                pixels[i, j] = BitConverter.ToUInt32(bytes, i);
-            }
-            UInt32[] transformedPixels = new UInt32[pixels.Length];
-
-
 
         }
         //public static Bitmap ConvertToBitmap(BitmapSource bitmapSource)
