@@ -246,8 +246,9 @@ namespace WpfApp3
             UInt32[,] pixels = new UInt32[height, width];
             UInt32[,] transformedPixels = new UInt32[height, width];
 
+            int i = 0;
             for (int h = 0; h < height; h++)
-                for (int w = 0, i = 0; w < width; w++, i += bytesPerPixel)
+                for (int w = 0; w < width; w++, i += bytesPerPixel)
                     pixels[h, w] = BitConverter.ToUInt32(bytes, i);
 
             // ---------------------------------------------------------------------------------
