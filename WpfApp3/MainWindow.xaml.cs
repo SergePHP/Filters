@@ -34,11 +34,7 @@ namespace WpfApp3
     public partial class MainWindow : Window
     {
         internal BitmapSource orirginalSourceBitmap = null;
-        //internal BitmapSource transformedSourceBitmap = null;
         internal BitmapSource displayedSourceBitmap = null;
-        //public static UInt32[,] pixel;
-        public static Bitmap bitmap = null;
-        //public BlurEffect myBlur = new BlurEffect();
 
         //размытие
         public const int matrixSize = 5;
@@ -132,37 +128,6 @@ namespace WpfApp3
             displayedSourceBitmap = BitmapSource.Create(newWidth, newHeight, displayedSourceBitmap.DpiY, 
                 displayedSourceBitmap.DpiX, displayedSourceBitmap.Format, null, transformedBytes, newStride);
             image.Source = displayedSourceBitmap;
-
-            //int width, height;
-
-            //if (transformedSourceBitmap == null)
-            //{
-            //    width = orirginalSourceBitmap.PixelWidth;
-            //    height = orirginalSourceBitmap.PixelHeight;
-            //}
-            //else
-            //{
-            //    width = transformedSourceBitmap.PixelWidth;
-            //    height = transformedSourceBitmap.PixelHeight;
-            //}
-            //UInt32[,] rotatedPixels = new UInt32[width, height];
-            //for (int y = 0; y < height; y++)
-            //{
-            //    for (int x = 0; x < width; x++)
-            //    {
-            //        //rotatedPixels[width - x - 1, y] = pixel[y, x];
-            //        rotatedPixels[x, height - y - 1] = pixel[y, x];
-            //    }
-            //}
-            //pixel = rotatedPixels;
-            //bitmap = new Bitmap(height, width, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-
-            //for (int y = 0; y < bitmap.Height; y++)
-            //    for (int x = 0; x < bitmap.Width; x++)
-            //        bitmap.SetPixel(x, y, System.Drawing.Color.FromArgb((int)pixel[y, x]));
-
-            //transformedSourceBitmap = ConvertToBitmapImage(bitmap);
-            //image.Source = transformedSourceBitmap;
         }
 
         private void Mirror_Click(object sender, RoutedEventArgs e)
@@ -242,6 +207,7 @@ namespace WpfApp3
         }
         private void Blur_Click(object sender, RoutedEventArgs e)
         {
+            //BlurEffect myBlur = new BlurEffect();
             //myBlur.Radius += 5;
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
@@ -268,7 +234,7 @@ namespace WpfApp3
             int i, j, k, m, gap = (int)(matrixSize / 2);
             int tmpH = height + 2 * gap, tmpW = width + 2 * gap;
             UInt32[,] tmppixel = new UInt32[tmpH, tmpW];
-            //UInt32[,] newpixel = new UInt32[height, width];
+
             //заполнение временного расширенного изображения
             //углы
             for (i = 0; i < gap; i++)
@@ -357,32 +323,6 @@ namespace WpfApp3
             Color.B = (float)(coefficient * (pixel & 0x000000FF));
             return Color;
         }
-
-        //public static Bitmap ConvertToBitmap(BitmapSource bitmapSource)
-        //{
-        //    var width = bitmapSource.PixelWidth;
-        //    var height = bitmapSource.PixelHeight;
-        //    var stride = width * (bitmapSource.Format.BitsPerPixel / 8);
-        //    var memoryBlockPointer = Marshal.AllocHGlobal(height * stride);
-        //    bitmapSource.CopyPixels(new Int32Rect(0, 0, width, height), memoryBlockPointer, height * stride, stride);
-        //    var bitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format32bppPArgb, memoryBlockPointer);
-        //    return bitmap;
-        //}
-
-        //public BitmapImage ConvertToBitmapImage(Bitmap bitmap)
-        //{
-        //    using (MemoryStream memory = new MemoryStream())
-        //    {
-        //        bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-        //        memory.Position = 0;
-        //        BitmapImage bitmapimage = new BitmapImage();
-        //        bitmapimage.BeginInit();
-        //        bitmapimage.StreamSource = memory;
-        //        bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-        //        bitmapimage.EndInit();
-        //        return bitmapimage;
-        //    }
-        //}
 
     }
 }
