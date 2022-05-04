@@ -41,10 +41,15 @@ namespace WpfApp3
         //public BlurEffect myBlur = new BlurEffect();
 
         //размытие
-        public const int matrixSize = 3;
-        public static double[,] blur = new double[matrixSize, matrixSize] {{0.111, 0.111, 0.111},
-                                                                           {0.111, 0.111, 0.111},
-                                                                           {0.111, 0.111, 0.111}};
+        public const int matrixSize = 5;
+        //public static double[,] blur = new double[matrixSize, matrixSize] {{0.111, 0.111, 0.111},
+        //                                                                   {0.111, 0.111, 0.111},
+        //                                                                   {0.111, 0.111, 0.111}};
+        public static double[,] blur = new double[matrixSize, matrixSize] {{0.000789, 0.006581, 0.013347, 0.006581, 0.000789},
+                                                                           {0.006581, 0.054901, 0.111345, 0.054901, 0.006581},
+                                                                           {0.013347, 0.111345, 0.225821, 0.111345, 0.013347},
+                                                                           {0.006581, 0.054901, 0.111345, 0.054901, 0.006581},
+                                                                           {0.000789, 0.006581, 0.013347, 0.006581, 0.000789}};
         public MainWindow()
         {
             InitializeComponent();
@@ -320,8 +325,21 @@ namespace WpfApp3
 
                     transformedPixels[i - gap, j - gap] = Build(ColorOfPixel);
                 }
+            byte[] transformedBytes = new byte[height * stride];
 
-            //return transformedPixels;
+            var bit = 0;
+            for (int x = 0; x < transformedPixels.GetUpperBound(0) + 1; x++ )
+                for (int y = 0; y < transformedPixels.GetUpperBound(1) + 1; y++, bit += bytesPerPixel)
+                {
+                    transformedBytes[bit] = (byte)transformedPixels[x, y];
+                    transformedBytes[bit + 1] = (byte)(transformedPixels[x, y] >> 8);
+                    transformedBytes[bit + 2] = (byte)(transformedPixels[x, y] >> 16);
+                    transformedBytes[bit + 3] = (byte)(transformedPixels[x, y] >> 24);
+                }
+
+            displayedSourceBitmap = BitmapSource.Create(width, height, displayedSourceBitmap.DpiX,
+                displayedSourceBitmap.DpiY, displayedSourceBitmap.Format, null, transformedBytes, stride);
+            image.Source = displayedSourceBitmap;
         }
         //сборка каналов
         public static UInt32 Build(RGB ColorOfPixel)
