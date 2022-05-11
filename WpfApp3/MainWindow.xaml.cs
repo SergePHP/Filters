@@ -223,7 +223,7 @@ namespace WpfApp3
             //image.Effect = myBlur;
 
             GussianBlur();
-
+            return;
 
             if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
                 displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
@@ -395,10 +395,10 @@ namespace WpfApp3
             byte[] bytes = new byte[h * stride];
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
 
-            int[] pix = new int[bytes.Length / bytesPerPixel];
+            UInt32[] pix = new UInt32[bytes.Length / bytesPerPixel];
             for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
             {
-                pix[j] = BitConverter.ToInt32(bytes, i);
+                pix[j] = BitConverter.ToUInt32(bytes, i);
             }
 
             UInt32[] tmp = new UInt32[bytes.Length / bytesPerPixel];
@@ -418,48 +418,62 @@ namespace WpfApp3
                 {
                     int currentX = Math.Min(Math.Max(x + j, 0), w - 1);
                     int index = y * w + currentX;
-                    Color color = Color.FromArgb(pix[index]);
+                    Color color = Color.FromArgb((int)pix[index]);
 
                     //int r = (pix[index] & 0x00ff0000) >> 16;
                     //int g = (pix[index] & 0x0000ff00) >> 8;
                     //int b = pix[index] & 0x000000ff;
                     //int a = (int)((uint)pix[index] & 0xff000000) >> 24;
+                    int a = color.A;
                     int r = color.R;
                     int g = color.G;
                     int b = color.B;
-                    int a = color.A;
                     sum[0] = sum[0] + a * kernel[Math.Abs(j)];
                     sum[1] = sum[1] + r * kernel[Math.Abs(j)];
                     sum[2] = sum[2] + g * kernel[Math.Abs(j)];
                     sum[3] = sum[3] + b * kernel[Math.Abs(j)];
                 }
                 Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+                tmp[i] = (uint)rc.ToArgb();
 
                 //tmp.setPixel(x, y, rc);
             }
             //tmp.getPixels(pix, 0, w, 0, 0, w, h);
-            ////纵向
-            //for (int i = 0; i < w * h; i++)
-            //{
-            //    int x = i % w;
-            //    int y = i / w;
-            //    double[] sum = new double[4];
-            //    for (int j = -radius; j <= radius; j++)
-            //    {
-            //        int currentY = Math.min(Math.max(y + j, 0), h - 1);
-            //        int index = currentY * w + x;
-            //        int r = Color.red(pix[index]);
-            //        int g = Color.green(pix[index]);
-            //        int b = Color.blue(pix[index]);
-            //        int a = Color.alpha(pix[index]);
-            //        sum[0] = sum[0] + a * kernel[Math.abs(j)];
-            //        sum[1] = sum[1] + r * kernel[Math.abs(j)];
-            //        sum[2] = sum[2] + g * kernel[Math.abs(j)];
-            //        sum[3] = sum[3] + b * kernel[Math.abs(j)];
-            //    }
-            //    int rc = Color.argb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
-            //    result.setPixel(x, y, rc);
-            //}
+            //纵向
+            for (int i = 0; i < w * h; i++)
+            {
+                int x = i % w;
+                int y = i / w;
+                double[] sum = new double[4];
+                for (int j = -radius; j <= radius; j++)
+                {
+                    int currentY = Math.Min(Math.Max(y + j, 0), h - 1);
+                    int index = currentY * w + x;
+                    Color color = Color.FromArgb((int)tmp[index]);
+                    int a = color.A;
+                    int r = color.R;
+                    int g = color.G;
+                    int b = color.B;
+                    sum[0] = sum[0] + a * kernel[Math.Abs(j)];
+                    sum[1] = sum[1] + r * kernel[Math.Abs(j)];
+                    sum[2] = sum[2] + g * kernel[Math.Abs(j)];
+                    sum[3] = sum[3] + b * kernel[Math.Abs(j)];
+                }
+                Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+                result[i] = (uint)rc.ToArgb();
+            }
+            byte[] transformedBytes = new byte[h * stride];
+            for (int i = 0, j = 0; i < result.Length; i++, j += bytesPerPixel)
+            {
+                transformedBytes[j] = (byte)result[i];
+                transformedBytes[j + 1] = (byte)(result[i] >> 8);
+                transformedBytes[j + 2] = (byte)(result[i] >> 16);
+                transformedBytes[j + 3] = (byte)(result[i] >> 24);
+            }
+
+            displayedSourceBitmap = BitmapSource.Create(w, h, displayedSourceBitmap.DpiX,
+                displayedSourceBitmap.DpiY, displayedSourceBitmap.Format, null, transformedBytes, stride);
+            image.Source = displayedSourceBitmap;
 
         }
         private void initKernel()
