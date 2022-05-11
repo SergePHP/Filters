@@ -37,7 +37,8 @@ namespace WpfApp3
         internal BitmapSource displayedSourceBitmap = null;
 
         //размытие
-        public const int matrixSize = 7;
+        //public const int matrixSize = 7;
+        public static double[,] blur;
         //public static double[,] blur = new double[matrixSize, matrixSize] {{0.111, 0.111, 0.111},
         //                                                                   {0.111, 0.111, 0.111},
         //                                                                   {0.111, 0.111, 0.111}};
@@ -48,13 +49,13 @@ namespace WpfApp3
         //                                                                   {0.000789, 0.006581, 0.013347, 0.006581, 0.000789}};
 
 
-        public static double[,] blur = new double[matrixSize, matrixSize] {{0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067},
-                                                                           {0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292},
-                                                                           {0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117},
-                                                                           {0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771},
-                                                                           {0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117},
-                                                                           {0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292},
-                                                                           {0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067}};
+        //public static double[,] blur = new double[matrixSize, matrixSize] {{0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067},
+        //                                                                   {0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292},
+        //                                                                   {0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117},
+        //                                                                   {0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771},
+        //                                                                   {0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117},
+        //                                                                   {0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292},
+        //                                                                   {0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067}};
         public MainWindow()
         {
             InitializeComponent();
@@ -80,8 +81,17 @@ namespace WpfApp3
             this.Close();
         }
 
+        public struct PixelColor
+        {
+            public byte Blue;
+            public byte Green;
+            public byte Red;
+            public byte Alpha;
+        }
+
         private void Rotate_Click(object sender, RoutedEventArgs e)
         {
+
             int width = displayedSourceBitmap.PixelWidth;
             int height = displayedSourceBitmap.PixelHeight;
 
@@ -90,6 +100,11 @@ namespace WpfApp3
 
             byte[] bytes = new byte[height * stride];
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
+
+
+            //PixelColor[] result = new PixelColor[height * stride];
+            //displayedSourceBitmap.CopyPixels(result, stride, 0);
+
 
             UInt32[] pixels = new UInt32[bytes.Length / bytesPerPixel];
             for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
@@ -221,6 +236,16 @@ namespace WpfApp3
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
 
+            if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
+                displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
+
+            if (blur == null)
+            {
+                blur = GetMatrix(0.6, 5);
+            }
+
+            int matrixSize = blur.GetUpperBound(0);
+
             int height = displayedSourceBitmap.PixelHeight;
             int width = displayedSourceBitmap.PixelWidth;
 
@@ -331,6 +356,127 @@ namespace WpfApp3
             Color.G = (float)(coefficient * ((pixel & 0x0000FF00) >> 8));
             Color.B = (float)(coefficient * (pixel & 0x000000FF));
             return Color;
+        }
+
+        public static double[,] GetMatrix(double sigma, int W)
+        {
+            double[,] kernel = new double[W, W];
+            double mean = W / 2;
+            double sum = 0.0; // For accumulating the kernel values
+
+            double c_part = 1 / (2 * Math.PI * sigma * sigma);
+
+            for (int x = 0; x < W; ++x) 
+                for (int y = 0; y < W; ++y) {
+
+                    kernel[x, y] = c_part * Math.Exp(-(Math.Pow(x - mean, 2.0) + Math.Pow(y - mean, 2.0)) / (2 * Math.Pow(sigma, 2.0)));
+
+                    //kernel[x, y] = Math.Exp(-0.5 * (Math.Pow((x - mean) / sigma, 2.0) + Math.Pow((y - mean) / sigma, 2.0)))
+                    //             / (2 * Math.PI * sigma * sigma);
+
+                    // Accumulate the kernel values
+                    sum += kernel[x, y];
+            }
+
+            // Normalize the kernel
+            for (int x = 0; x < W; ++x) 
+                for (int y = 0; y < W; ++y)
+                    kernel[x, y] /= sum;
+
+            return kernel;
+        }
+
+        private static int sigma = 15;
+        private static int radius = 3 * sigma;
+        private static double[] kernel = new double[radius + 1];
+
+        public void GussianBlur()
+        {
+            initKernel();
+
+            if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
+                displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
+
+            int h = displayedSourceBitmap.PixelHeight;
+            int w = displayedSourceBitmap.PixelWidth;
+
+            var bytesPerPixel = displayedSourceBitmap.Format.BitsPerPixel / 8;
+            var stride = w * bytesPerPixel;
+
+            byte[] bytes = new byte[h * stride];
+            displayedSourceBitmap.CopyPixels(bytes, stride, 0);
+
+
+            //int[] pix = new int[w * h];
+            //bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+            //Bitmap tmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            //Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+
+            for (int i = 0; i < w * h; i++)
+            {
+                int x = i % w;
+                int y = i / w;
+                double[] sum = new double[4];
+                for (int j = -radius; j <= radius; j++)
+                {
+                    int currentX = Math.min(Math.max(x + j, 0), w - 1);
+                    int index = y * w + currentX;
+                    int a = Color.alpha(pix[index]);
+                    int r = Color.red(pix[index]);
+                    int g = Color.green(pix[index]);
+                    int b = Color.blue(pix[index]);
+                    sum[0] = sum[0] + a * kernel[Math.abs(j)];
+                    sum[1] = sum[1] + r * kernel[Math.abs(j)];
+                    sum[2] = sum[2] + g * kernel[Math.abs(j)];
+                    sum[3] = sum[3] + b * kernel[Math.abs(j)];
+                }
+                int rc = Color.argb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+                tmp.setPixel(x, y, rc);
+            }
+            tmp.getPixels(pix, 0, w, 0, 0, w, h);
+            //纵向
+            for (int i = 0; i < w * h; i++)
+            {
+                int x = i % w;
+                int y = i / w;
+                double[] sum = new double[4];
+                for (int j = -radius; j <= radius; j++)
+                {
+                    int currentY = Math.min(Math.max(y + j, 0), h - 1);
+                    int index = currentY * w + x;
+                    int r = Color.red(pix[index]);
+                    int g = Color.green(pix[index]);
+                    int b = Color.blue(pix[index]);
+                    int a = Color.alpha(pix[index]);
+                    sum[0] = sum[0] + a * kernel[Math.abs(j)];
+                    sum[1] = sum[1] + r * kernel[Math.abs(j)];
+                    sum[2] = sum[2] + g * kernel[Math.abs(j)];
+                    sum[3] = sum[3] + b * kernel[Math.abs(j)];
+                }
+                int rc = Color.argb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+                result.setPixel(x, y, rc);
+            }
+
+        }
+        private void initKernel()
+        {
+            double sum = 0.0;
+            for (int i = 0; i < kernel.Length; i++)
+            {
+                kernel[i] = 0.39894 * Math.Exp(-(i * i * 1.0) / (2.0 * sigma * sigma)) / sigma;
+                if (i > 0)
+                {
+                    sum = sum + kernel[i] * 2.0;
+                }
+                else
+                {
+                    sum = sum + kernel[i];
+                }
+            }
+            for (int i = 0; i < kernel.Length; i++)
+            {
+                kernel[i] = kernel[i] / sum;
+            }
         }
 
     }
