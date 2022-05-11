@@ -404,11 +404,6 @@ namespace WpfApp3
             UInt32[] tmp = new UInt32[bytes.Length / bytesPerPixel];
             UInt32[] result = new UInt32[bytes.Length / bytesPerPixel];
 
-            //int[] pix = new int[w * h];
-            //bitmap.getPixels(pix, 0, w, 0, 0, w, h);
-            //Bitmap tmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            //Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-
             for (int i = 0; i < w * h; i++)
             {
                 int x = i % w;
@@ -419,11 +414,6 @@ namespace WpfApp3
                     int currentX = Math.Min(Math.Max(x + j, 0), w - 1);
                     int index = y * w + currentX;
                     Color color = Color.FromArgb((int)pix[index]);
-
-                    //int r = (pix[index] & 0x00ff0000) >> 16;
-                    //int g = (pix[index] & 0x0000ff00) >> 8;
-                    //int b = pix[index] & 0x000000ff;
-                    //int a = (int)((uint)pix[index] & 0xff000000) >> 24;
                     int a = color.A;
                     int r = color.R;
                     int g = color.G;
@@ -435,11 +425,7 @@ namespace WpfApp3
                 }
                 Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
                 tmp[i] = (uint)rc.ToArgb();
-
-                //tmp.setPixel(x, y, rc);
             }
-            //tmp.getPixels(pix, 0, w, 0, 0, w, h);
-            //纵向
             for (int i = 0; i < w * h; i++)
             {
                 int x = i % w;
