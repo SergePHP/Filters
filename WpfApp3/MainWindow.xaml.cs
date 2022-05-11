@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Effects;
+using Color = System.Drawing.Color;
 
 namespace WpfApp3
 {
@@ -80,15 +81,6 @@ namespace WpfApp3
         {
             this.Close();
         }
-
-        public struct PixelColor
-        {
-            public byte Blue;
-            public byte Green;
-            public byte Red;
-            public byte Alpha;
-        }
-
         private void Rotate_Click(object sender, RoutedEventArgs e)
         {
 
@@ -100,11 +92,6 @@ namespace WpfApp3
 
             byte[] bytes = new byte[height * stride];
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
-
-
-            //PixelColor[] result = new PixelColor[height * stride];
-            //displayedSourceBitmap.CopyPixels(result, stride, 0);
-
 
             UInt32[] pixels = new UInt32[bytes.Length / bytesPerPixel];
             for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
@@ -153,7 +140,6 @@ namespace WpfApp3
                 displayedSourceBitmap.DpiX, displayedSourceBitmap.Format, null, transformedBytes, newStride);
             image.Source = displayedSourceBitmap;
         }
-
         private void Mirror_Click(object sender, RoutedEventArgs e)
         {
             int width = displayedSourceBitmap.PixelWidth;
@@ -235,6 +221,9 @@ namespace WpfApp3
             //myBlur.Radius += 5;
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
+
+            GussianBlur();
+
 
             if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
                 displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
@@ -386,7 +375,7 @@ namespace WpfApp3
             return kernel;
         }
 
-        private static int sigma = 15;
+        private static int sigma = 5;
         private static int radius = 3 * sigma;
         private static double[] kernel = new double[radius + 1];
 
@@ -406,6 +395,14 @@ namespace WpfApp3
             byte[] bytes = new byte[h * stride];
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
 
+            int[] pix = new int[bytes.Length / bytesPerPixel];
+            for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
+            {
+                pix[j] = BitConverter.ToInt32(bytes, i);
+            }
+
+            UInt32[] tmp = new UInt32[bytes.Length / bytesPerPixel];
+            UInt32[] result = new UInt32[bytes.Length / bytesPerPixel];
 
             //int[] pix = new int[w * h];
             //bitmap.getPixels(pix, 0, w, 0, 0, w, h);
@@ -419,43 +416,50 @@ namespace WpfApp3
                 double[] sum = new double[4];
                 for (int j = -radius; j <= radius; j++)
                 {
-                    int currentX = Math.min(Math.max(x + j, 0), w - 1);
+                    int currentX = Math.Min(Math.Max(x + j, 0), w - 1);
                     int index = y * w + currentX;
-                    int a = Color.alpha(pix[index]);
-                    int r = Color.red(pix[index]);
-                    int g = Color.green(pix[index]);
-                    int b = Color.blue(pix[index]);
-                    sum[0] = sum[0] + a * kernel[Math.abs(j)];
-                    sum[1] = sum[1] + r * kernel[Math.abs(j)];
-                    sum[2] = sum[2] + g * kernel[Math.abs(j)];
-                    sum[3] = sum[3] + b * kernel[Math.abs(j)];
+                    Color color = Color.FromArgb(pix[index]);
+
+                    //int r = (pix[index] & 0x00ff0000) >> 16;
+                    //int g = (pix[index] & 0x0000ff00) >> 8;
+                    //int b = pix[index] & 0x000000ff;
+                    //int a = (int)((uint)pix[index] & 0xff000000) >> 24;
+                    int r = color.R;
+                    int g = color.G;
+                    int b = color.B;
+                    int a = color.A;
+                    sum[0] = sum[0] + a * kernel[Math.Abs(j)];
+                    sum[1] = sum[1] + r * kernel[Math.Abs(j)];
+                    sum[2] = sum[2] + g * kernel[Math.Abs(j)];
+                    sum[3] = sum[3] + b * kernel[Math.Abs(j)];
                 }
-                int rc = Color.argb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
-                tmp.setPixel(x, y, rc);
+                Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+
+                //tmp.setPixel(x, y, rc);
             }
-            tmp.getPixels(pix, 0, w, 0, 0, w, h);
-            //纵向
-            for (int i = 0; i < w * h; i++)
-            {
-                int x = i % w;
-                int y = i / w;
-                double[] sum = new double[4];
-                for (int j = -radius; j <= radius; j++)
-                {
-                    int currentY = Math.min(Math.max(y + j, 0), h - 1);
-                    int index = currentY * w + x;
-                    int r = Color.red(pix[index]);
-                    int g = Color.green(pix[index]);
-                    int b = Color.blue(pix[index]);
-                    int a = Color.alpha(pix[index]);
-                    sum[0] = sum[0] + a * kernel[Math.abs(j)];
-                    sum[1] = sum[1] + r * kernel[Math.abs(j)];
-                    sum[2] = sum[2] + g * kernel[Math.abs(j)];
-                    sum[3] = sum[3] + b * kernel[Math.abs(j)];
-                }
-                int rc = Color.argb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
-                result.setPixel(x, y, rc);
-            }
+            //tmp.getPixels(pix, 0, w, 0, 0, w, h);
+            ////纵向
+            //for (int i = 0; i < w * h; i++)
+            //{
+            //    int x = i % w;
+            //    int y = i / w;
+            //    double[] sum = new double[4];
+            //    for (int j = -radius; j <= radius; j++)
+            //    {
+            //        int currentY = Math.min(Math.max(y + j, 0), h - 1);
+            //        int index = currentY * w + x;
+            //        int r = Color.red(pix[index]);
+            //        int g = Color.green(pix[index]);
+            //        int b = Color.blue(pix[index]);
+            //        int a = Color.alpha(pix[index]);
+            //        sum[0] = sum[0] + a * kernel[Math.abs(j)];
+            //        sum[1] = sum[1] + r * kernel[Math.abs(j)];
+            //        sum[2] = sum[2] + g * kernel[Math.abs(j)];
+            //        sum[3] = sum[3] + b * kernel[Math.abs(j)];
+            //    }
+            //    int rc = Color.argb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+            //    result.setPixel(x, y, rc);
+            //}
 
         }
         private void initKernel()
@@ -478,6 +482,5 @@ namespace WpfApp3
                 kernel[i] = kernel[i] / sum;
             }
         }
-
     }
 }
