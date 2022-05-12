@@ -456,11 +456,9 @@ namespace WpfApp3
                 transformedBytes[j + 2] = (byte)(result[i] >> 16);
                 transformedBytes[j + 3] = (byte)(result[i] >> 24);
             }
-
             displayedSourceBitmap = BitmapSource.Create(w, h, displayedSourceBitmap.DpiX,
                 displayedSourceBitmap.DpiY, displayedSourceBitmap.Format, null, transformedBytes, stride);
             image.Source = displayedSourceBitmap;
-
         }
         private void initKernel()
         {
