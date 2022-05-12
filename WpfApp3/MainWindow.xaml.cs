@@ -414,14 +414,10 @@ namespace WpfApp3
                     int currentX = Math.Min(Math.Max(x + j, 0), w - 1);
                     int index = y * w + currentX;
                     Color color = Color.FromArgb(pix[index]);
-                    int a = color.A;
-                    int r = color.R;
-                    int g = color.G;
-                    int b = color.B;
-                    sum[0] = sum[0] + a * kernel[Math.Abs(j)];
-                    sum[1] = sum[1] + r * kernel[Math.Abs(j)];
-                    sum[2] = sum[2] + g * kernel[Math.Abs(j)];
-                    sum[3] = sum[3] + b * kernel[Math.Abs(j)];
+                    sum[0] = sum[0] + color.A * kernel[Math.Abs(j)];
+                    sum[1] = sum[1] + color.R * kernel[Math.Abs(j)];
+                    sum[2] = sum[2] + color.G * kernel[Math.Abs(j)];
+                    sum[3] = sum[3] + color.B * kernel[Math.Abs(j)];
                 }
                 Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
                 tmp[i] = rc.ToArgb();
@@ -436,14 +432,10 @@ namespace WpfApp3
                     int currentY = Math.Min(Math.Max(y + j, 0), h - 1);
                     int index = currentY * w + x;
                     Color color = Color.FromArgb(tmp[index]);
-                    int a = color.A;
-                    int r = color.R;
-                    int g = color.G;
-                    int b = color.B;
-                    sum[0] = sum[0] + a * kernel[Math.Abs(j)];
-                    sum[1] = sum[1] + r * kernel[Math.Abs(j)];
-                    sum[2] = sum[2] + g * kernel[Math.Abs(j)];
-                    sum[3] = sum[3] + b * kernel[Math.Abs(j)];
+                    sum[0] = sum[0] + color.A * kernel[Math.Abs(j)];
+                    sum[1] = sum[1] + color.R * kernel[Math.Abs(j)];
+                    sum[2] = sum[2] + color.G * kernel[Math.Abs(j)];
+                    sum[3] = sum[3] + color.B * kernel[Math.Abs(j)];
                 }
                 Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
                 result[i] = rc.ToArgb();
