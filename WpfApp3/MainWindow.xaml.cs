@@ -395,14 +395,14 @@ namespace WpfApp3
             byte[] bytes = new byte[h * stride];
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
 
-            UInt32[] pix = new UInt32[bytes.Length / bytesPerPixel];
+            int[] pix = new int[bytes.Length / bytesPerPixel];
             for (int i = 0, j = 0; i < bytes.Length; i += bytesPerPixel, j++)
             {
-                pix[j] = BitConverter.ToUInt32(bytes, i);
+                pix[j] = BitConverter.ToInt32(bytes, i);
             }
 
-            UInt32[] tmp = new UInt32[bytes.Length / bytesPerPixel];
-            UInt32[] result = new UInt32[bytes.Length / bytesPerPixel];
+            int[] tmp = new int[bytes.Length / bytesPerPixel];
+            int[] result = new int[bytes.Length / bytesPerPixel];
 
             for (int i = 0; i < w * h; i++)
             {
@@ -413,7 +413,7 @@ namespace WpfApp3
                 {
                     int currentX = Math.Min(Math.Max(x + j, 0), w - 1);
                     int index = y * w + currentX;
-                    Color color = Color.FromArgb((int)pix[index]);
+                    Color color = Color.FromArgb(pix[index]);
                     int a = color.A;
                     int r = color.R;
                     int g = color.G;
@@ -424,7 +424,7 @@ namespace WpfApp3
                     sum[3] = sum[3] + b * kernel[Math.Abs(j)];
                 }
                 Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
-                tmp[i] = (uint)rc.ToArgb();
+                tmp[i] = rc.ToArgb();
             }
             for (int i = 0; i < w * h; i++)
             {
@@ -435,7 +435,7 @@ namespace WpfApp3
                 {
                     int currentY = Math.Min(Math.Max(y + j, 0), h - 1);
                     int index = currentY * w + x;
-                    Color color = Color.FromArgb((int)tmp[index]);
+                    Color color = Color.FromArgb(tmp[index]);
                     int a = color.A;
                     int r = color.R;
                     int g = color.G;
@@ -446,7 +446,7 @@ namespace WpfApp3
                     sum[3] = sum[3] + b * kernel[Math.Abs(j)];
                 }
                 Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
-                result[i] = (uint)rc.ToArgb();
+                result[i] = rc.ToArgb();
             }
             byte[] transformedBytes = new byte[h * stride];
             for (int i = 0, j = 0; i < result.Length; i++, j += bytesPerPixel)
@@ -467,7 +467,7 @@ namespace WpfApp3
             double sum = 0.0;
             for (int i = 0; i < kernel.Length; i++)
             {
-                kernel[i] = 0.39894 * Math.Exp(-(i * i * 1.0) / (2.0 * sigma * sigma)) / sigma;
+                kernel[i] = 1/Math.Sqrt(2 * Math.PI) * Math.Exp(-(i * i * 1.0) / (2.0 * sigma * sigma)) / sigma;
                 if (i > 0)
                 {
                     sum = sum + kernel[i] * 2.0;
