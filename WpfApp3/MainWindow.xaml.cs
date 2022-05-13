@@ -38,11 +38,14 @@ namespace WpfApp3
         internal BitmapSource displayedSourceBitmap = null;
 
         //размытие
-        //public const int matrixSize = 7;
-        public static double[,] blur;
+        public const int matrixSize = 3;
+        //public static double[,] blur;
         //public static double[,] blur = new double[matrixSize, matrixSize] {{0.111, 0.111, 0.111},
         //                                                                   {0.111, 0.111, 0.111},
         //                                                                   {0.111, 0.111, 0.111}};
+        public static double[,] blur = new double[matrixSize, matrixSize] {{-1, -1, -1},
+                                                                           {-1, 9, -1},
+                                                                           {-1, -1, -1}};
         //public static double[,] blur = new double[matrixSize, matrixSize] {{0.000789, 0.006581, 0.013347, 0.006581, 0.000789},
         //                                                                   {0.006581, 0.054901, 0.111345, 0.054901, 0.006581},
         //                                                                   {0.013347, 0.111345, 0.225821, 0.111345, 0.013347},
@@ -222,18 +225,18 @@ namespace WpfApp3
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
 
-            GussianBlur();
-            return;
+            //GussianBlur();
+            // return;
 
-            if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
-                displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
+            //if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
+            //    displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
 
-            if (blur == null)
-            {
-                blur = GetMatrix(0.6, 5);
-            }
+            //if (blur == null)
+            //{
+            //    blur = GetMatrix(0.6, 5);
+            //}
 
-            int matrixSize = blur.GetUpperBound(0);
+            //int matrixSize = blur.GetUpperBound(0);
 
             int height = displayedSourceBitmap.PixelHeight;
             int width = displayedSourceBitmap.PixelWidth;
@@ -471,6 +474,15 @@ namespace WpfApp3
             {
                 kernel[i] = kernel[i] / sum;
             }
+        }
+
+        private void Sharp_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void Median_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

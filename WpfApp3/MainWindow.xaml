@@ -28,6 +28,8 @@
             <Button x:Name="mirrorg" Content="Отразить горизонтально" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Mirror_Click" />
             <Button x:Name="inversion" Content="Инверсия" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Inversion_Click" />
             <Button x:Name="blurEffect" Content="Размытие" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Blur_Click" />
+            <Button x:Name="sharpEffect" Content="Резкость" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Sharp_Click" />
+            <Button x:Name="medianFilter" Content="Удаление шума" DockPanel.Dock="Top" HorizontalAlignment="Left" Width="150" Margin="1,0,1,0" Click="Median_Click" />
             <Image x:Name="image" />
         </DockPanel >
         <Label x:Name="label" Content="Нет рисунка" HorizontalAlignment="Center" VerticalAlignment="Center" />
