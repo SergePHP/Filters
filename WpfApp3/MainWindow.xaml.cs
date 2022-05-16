@@ -247,19 +247,40 @@ namespace WpfApp3
             byte[] bytes = new byte[height * stride];
             displayedSourceBitmap.CopyPixels(bytes, stride, 0);
 
-            UInt32[,] pixels = new UInt32[height, width];
-            UInt32[,] transformedPixels = new UInt32[height, width];
+            int[,] pixels = new int[height, width];
+            int[,] transformedPixels = new int[height, width];
 
             int index = 0;
             for (int h = 0; h < height; h++)
                 for (int w = 0; w < width; w++, index += bytesPerPixel)
-                    pixels[h, w] = BitConverter.ToUInt32(bytes, index);
-
+                    pixels[h, w] = BitConverter.ToInt32(bytes, index);
             // ---------------------------------------------------------------------------------
-
             int i, j, k, m, gap = (int)(matrixSize / 2);
             int tmpH = height + 2 * gap, tmpW = width + 2 * gap;
-            UInt32[,] tmppixel = new UInt32[tmpH, tmpW];
+            int[,] tmppixel = new int[tmpH, tmpW];
+
+            //int height = displayedSourceBitmap.PixelHeight;
+            //int width = displayedSourceBitmap.PixelWidth;
+
+            //var bytesPerPixel = displayedSourceBitmap.Format.BitsPerPixel / 8;
+            //var stride = width * bytesPerPixel;
+
+            //byte[] bytes = new byte[height * stride];
+            //displayedSourceBitmap.CopyPixels(bytes, stride, 0);
+
+            //UInt32[,] pixels = new UInt32[height, width];
+            //UInt32[,] transformedPixels = new UInt32[height, width];
+
+            //int index = 0;
+            //for (int h = 0; h < height; h++)
+            //    for (int w = 0; w < width; w++, index += bytesPerPixel)
+            //        pixels[h, w] = BitConverter.ToUInt32(bytes, index);
+
+            //// ---------------------------------------------------------------------------------
+
+            //int i, j, k, m, gap = (int)(matrixSize / 2);
+            //int tmpH = height + 2 * gap, tmpW = width + 2 * gap;
+            //UInt32[,] tmppixel = new UInt32[tmpH, tmpW];
 
             //заполнение временного расширенного изображения
             //углы
@@ -291,33 +312,61 @@ namespace WpfApp3
                     tmppixel[i + gap, j + gap] = pixels[i, j];
 
             //применение ядра свертки
-            RGB ColorOfPixel = new RGB();
-            RGB ColorOfCell = new RGB();
+
             for (i = gap; i < tmpH - gap; i++)
                 for (j = gap; j < tmpW - gap; j++)
                 {
-                    ColorOfPixel.R = 0;
-                    ColorOfPixel.G = 0;
-                    ColorOfPixel.B = 0;
+                    double[] sum = new double[4];
                     for (k = 0; k < matrixSize; k++)
                         for (m = 0; m < matrixSize; m++)
                         {
-                            ColorOfCell = CalculationOfColor(tmppixel[i - gap + k, j - gap + m], blur[k, m]);
-                            ColorOfPixel.R += ColorOfCell.R;
-                            ColorOfPixel.G += ColorOfCell.G;
-                            ColorOfPixel.B += ColorOfCell.B;
+                            Color color = Color.FromArgb(tmppixel[i - gap + k, j - gap + m]);
+                            sum[0] = sum[0] + color.A * blur[k, m];
+                            sum[1] = sum[1] + color.R * blur[k, m];
+                            sum[2] = sum[2] + color.G * blur[k, m];
+                            sum[3] = sum[3] + color.B * blur[k, m];
                         }
-                    //контролируем переполнение переменных
-                    if (ColorOfPixel.R < 0) ColorOfPixel.R = 0;
-                    if (ColorOfPixel.R > 255) ColorOfPixel.R = 255;
-                    if (ColorOfPixel.G < 0) ColorOfPixel.G = 0;
-                    if (ColorOfPixel.G > 255) ColorOfPixel.G = 255;
-                    if (ColorOfPixel.B < 0) ColorOfPixel.B = 0;
-                    if (ColorOfPixel.B > 255) ColorOfPixel.B = 255;
+                    if (sum[0] < 0) sum[0] = 0;
+                    if (sum[0] > 255) sum[0] = 255;
+                    if (sum[1] < 0) sum[1] = 0;
+                    if (sum[1] > 255) sum[1] = 255;
+                    if (sum[2] < 0) sum[2] = 0;
+                    if (sum[2] > 255) sum[2] = 255;
+                    if (sum[3] < 0) sum[3] = 0;
+                    if (sum[3] > 255) sum[3] = 255;
 
-                    transformedPixels[i - gap, j - gap] = Build(ColorOfPixel);
+                    Color rc = Color.FromArgb((int)sum[0], (int)sum[1], (int)sum[2], (int)sum[3]);
+                    transformedPixels[i - gap, j - gap] = rc.ToArgb();
                 }
             byte[] transformedBytes = new byte[height * stride];
+            ////применение ядра свертки
+            //RGB ColorOfPixel = new RGB();
+            //RGB ColorOfCell = new RGB();
+            //for (i = gap; i < tmpH - gap; i++)
+            //    for (j = gap; j < tmpW - gap; j++)
+            //    {
+            //        ColorOfPixel.R = 0;
+            //        ColorOfPixel.G = 0;
+            //        ColorOfPixel.B = 0;
+            //        for (k = 0; k < matrixSize; k++)
+            //            for (m = 0; m < matrixSize; m++)
+            //            {
+            //                ColorOfCell = CalculationOfColor(tmppixel[i - gap + k, j - gap + m], blur[k, m]);
+            //                ColorOfPixel.R += ColorOfCell.R;
+            //                ColorOfPixel.G += ColorOfCell.G;
+            //                ColorOfPixel.B += ColorOfCell.B;
+            //            }
+            //        //контролируем переполнение переменных
+            //        if (ColorOfPixel.R < 0) ColorOfPixel.R = 0;
+            //        if (ColorOfPixel.R > 255) ColorOfPixel.R = 255;
+            //        if (ColorOfPixel.G < 0) ColorOfPixel.G = 0;
+            //        if (ColorOfPixel.G > 255) ColorOfPixel.G = 255;
+            //        if (ColorOfPixel.B < 0) ColorOfPixel.B = 0;
+            //        if (ColorOfPixel.B > 255) ColorOfPixel.B = 255;
+
+            //        transformedPixels[i - gap, j - gap] = Build(ColorOfPixel);
+            //    }
+            //byte[] transformedBytes = new byte[height * stride];
 
             var bit = 0;
             for (int x = 0; x < transformedPixels.GetUpperBound(0) + 1; x++ )
@@ -333,22 +382,22 @@ namespace WpfApp3
                 displayedSourceBitmap.DpiY, displayedSourceBitmap.Format, null, transformedBytes, stride);
             image.Source = displayedSourceBitmap;
         }
-        //сборка каналов
-        public static UInt32 Build(RGB ColorOfPixel)
-        {
-            UInt32 Color;
-            Color = 0xFF000000 | ((UInt32)ColorOfPixel.R << 16) | ((UInt32)ColorOfPixel.G << 8) | ((UInt32)ColorOfPixel.B);
-            return Color;
-        }
-        //вычисление нового цвета
-        public static RGB CalculationOfColor(UInt32 pixel, double coefficient)
-        {
-            RGB Color = new RGB();
-            Color.R = (float)(coefficient * ((pixel & 0x00FF0000) >> 16));
-            Color.G = (float)(coefficient * ((pixel & 0x0000FF00) >> 8));
-            Color.B = (float)(coefficient * (pixel & 0x000000FF));
-            return Color;
-        }
+        ////сборка каналов
+        //public static UInt32 Build(RGB ColorOfPixel)
+        //{
+        //    UInt32 Color;
+        //    Color = 0xFF000000 | ((UInt32)ColorOfPixel.R << 16) | ((UInt32)ColorOfPixel.G << 8) | ((UInt32)ColorOfPixel.B);
+        //    return Color;
+        //}
+        ////вычисление нового цвета
+        //public static RGB CalculationOfColor(UInt32 pixel, double coefficient)
+        //{
+        //    RGB Color = new RGB();
+        //    Color.R = (float)(coefficient * ((pixel & 0x00FF0000) >> 16));
+        //    Color.G = (float)(coefficient * ((pixel & 0x0000FF00) >> 8));
+        //    Color.B = (float)(coefficient * (pixel & 0x000000FF));
+        //    return Color;
+        //}
 
         public static double[,] GetMatrix(double sigma, int W)
         {
