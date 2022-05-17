@@ -225,18 +225,18 @@ namespace WpfApp3
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
 
-            //GussianBlur();
-            // return;
+            GussianBlur();
+            return;
 
-            //if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
-            //    displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
+            if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
+                displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
 
             //if (blur == null)
             //{
             //    blur = GetMatrix(0.6, 5);
             //}
-
             //int matrixSize = blur.GetUpperBound(0);
+
 
             int height = displayedSourceBitmap.PixelHeight;
             int width = displayedSourceBitmap.PixelWidth;
@@ -427,7 +427,7 @@ namespace WpfApp3
             return kernel;
         }
 
-        private static int sigma = 5;
+        private static int sigma = 4;
         private static int radius = 3 * sigma;
         private static double[] kernel = new double[radius + 1];
 
@@ -509,7 +509,7 @@ namespace WpfApp3
             double sum = 0.0;
             for (int i = 0; i < kernel.Length; i++)
             {
-                kernel[i] = 1/Math.Sqrt(2 * Math.PI) * Math.Exp(-(i * i * 1.0) / (2.0 * sigma * sigma)) / sigma;
+                kernel[i] = 1 / Math.Sqrt(2 * Math.PI) * Math.Exp(-(i * i * 1.0) / (2.0 * sigma * sigma)) / sigma;
                 if (i > 0)
                 {
                     sum = sum + kernel[i] * 2.0;
