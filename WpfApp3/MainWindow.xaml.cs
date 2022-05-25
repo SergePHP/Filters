@@ -43,23 +43,18 @@ namespace WpfApp3
         //public static double[,] blur = new double[matrixSize, matrixSize] {{0.111, 0.111, 0.111},
         //                                                                   {0.111, 0.111, 0.111},
         //                                                                   {0.111, 0.111, 0.111}};
-        public static double[,] blur = new double[matrixSize, matrixSize] {{-1, -1, -1},
-                                                                           {-1, 9, -1},
-                                                                           {-1, -1, -1}};
-        //public static double[,] blur = new double[matrixSize, matrixSize] {{0.000789, 0.006581, 0.013347, 0.006581, 0.000789},
-        //                                                                   {0.006581, 0.054901, 0.111345, 0.054901, 0.006581},
-        //                                                                   {0.013347, 0.111345, 0.225821, 0.111345, 0.013347},
-        //                                                                   {0.006581, 0.054901, 0.111345, 0.054901, 0.006581},
-        //                                                                   {0.000789, 0.006581, 0.013347, 0.006581, 0.000789}};
+        //public static double[,] blur = new double[matrixSize, matrixSize] {{-1, -1, -1},
+        //                                                                   {-1, 16, -1},
+        //                                                                   {-1, -1, -1}}; //div = 8
+        //public static double[,] blur = new double[matrixSize, matrixSize] {{-1, -1, -1},
+        //                                                                   {-1, 9, -1},
+        //                                                                   {-1, -1, -1}};
+        public static double[,] blur = new double[matrixSize, matrixSize] {{1, 2, 1},
+                                                                           {2, 4, 2},
+                                                                           {1, 2, 1}};
 
 
-        //public static double[,] blur = new double[matrixSize, matrixSize] {{0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067},
-        //                                                                   {0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292},
-        //                                                                   {0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117},
-        //                                                                   {0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771},
-        //                                                                   {0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117},
-        //                                                                   {0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292},
-        //                                                                   {0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067}};
+
         public MainWindow()
         {
             InitializeComponent();
@@ -225,8 +220,8 @@ namespace WpfApp3
             //myBlur.KernelType = KernelType.Gaussian;
             //image.Effect = myBlur;
 
-            GussianBlur();
-            return;
+            //GussianBlur();
+            //return;
 
             if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
                 displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
@@ -326,6 +321,9 @@ namespace WpfApp3
                             sum[2] = sum[2] + color.G * blur[k, m];
                             sum[3] = sum[3] + color.B * blur[k, m];
                         }
+                    for (int z = 0; z < sum.Length; z++)
+                        sum[z] /= 16;
+
                     if (sum[0] < 0) sum[0] = 0;
                     if (sum[0] > 255) sum[0] = 255;
                     if (sum[1] < 0) sum[1] = 0;
@@ -531,7 +529,129 @@ namespace WpfApp3
         }
         private void Median_Click(object sender, RoutedEventArgs e)
         {
+            if (displayedSourceBitmap.Format != PixelFormats.Bgra32)
+                displayedSourceBitmap = new FormatConvertedBitmap(displayedSourceBitmap, PixelFormats.Bgra32, null, 0);
 
+            int height = displayedSourceBitmap.PixelHeight;
+            int width = displayedSourceBitmap.PixelWidth;
+
+            var bytesPerPixel = displayedSourceBitmap.Format.BitsPerPixel / 8;
+            var stride = width * bytesPerPixel;
+
+            byte[] bytes = new byte[height * stride];
+            displayedSourceBitmap.CopyPixels(bytes, stride, 0);
+
+            int[,] pixels = new int[height, width];
+            int[,] transformedPixels = new int[height, width];
+
+            int index = 0;
+            for (int h = 0; h < height; h++)
+                for (int w = 0; w < width; w++, index += bytesPerPixel)
+                    pixels[h, w] = BitConverter.ToInt32(bytes, index);
+            // ---------------------------------------------------------------------------------
+            int i, j, k, m, gap = (int)(matrixSize / 2);
+            int tmpH = height + 2 * gap, tmpW = width + 2 * gap;
+            int[,] tmppixel = new int[tmpH, tmpW];
+
+            //int height = displayedSourceBitmap.PixelHeight;
+            //int width = displayedSourceBitmap.PixelWidth;
+
+            //var bytesPerPixel = displayedSourceBitmap.Format.BitsPerPixel / 8;
+            //var stride = width * bytesPerPixel;
+
+            //byte[] bytes = new byte[height * stride];
+            //displayedSourceBitmap.CopyPixels(bytes, stride, 0);
+
+            //UInt32[,] pixels = new UInt32[height, width];
+            //UInt32[,] transformedPixels = new UInt32[height, width];
+
+            //int index = 0;
+            //for (int h = 0; h < height; h++)
+            //    for (int w = 0; w < width; w++, index += bytesPerPixel)
+            //        pixels[h, w] = BitConverter.ToUInt32(bytes, index);
+
+            //// ---------------------------------------------------------------------------------
+
+            //int i, j, k, m, gap = (int)(matrixSize / 2);
+            //int tmpH = height + 2 * gap, tmpW = width + 2 * gap;
+            //UInt32[,] tmppixel = new UInt32[tmpH, tmpW];
+
+            //заполнение временного расширенного изображения
+            //углы
+            for (i = 0; i < gap; i++)
+                for (j = 0; j < gap; j++)
+                {
+                    tmppixel[i, j] = pixels[0, 0];
+                    tmppixel[i, tmpW - 1 - j] = pixels[0, width - 1];
+                    tmppixel[tmpH - 1 - i, j] = pixels[height - 1, 0];
+                    tmppixel[tmpH - 1 - i, tmpW - 1 - j] = pixels[height - 1, width - 1];
+                }
+            //крайние левая и правая стороны
+            for (i = gap; i < tmpH - gap; i++)
+                for (j = 0; j < gap; j++)
+                {
+                    tmppixel[i, j] = pixels[i - gap, j];
+                    tmppixel[i, tmpW - 1 - j] = pixels[i - gap, width - 1 - j];
+                }
+            //крайние верхняя и нижняя стороны
+            for (i = 0; i < gap; i++)
+                for (j = gap; j < tmpW - gap; j++)
+                {
+                    tmppixel[i, j] = pixels[i, j - gap];
+                    tmppixel[tmpH - 1 - i, j] = pixels[height - 1 - i, j - gap];
+                }
+            //центр
+            for (i = 0; i < height; i++)
+                for (j = 0; j < width; j++)
+                    tmppixel[i + gap, j + gap] = pixels[i, j];
+            //применение ядра свертки
+
+            int z;
+            for (i = gap; i < tmpH - gap; i++)
+                for (j = gap; j < tmpW - gap; j++)
+                {
+                    int[] array1 = new int[matrixSize * matrixSize];
+                    for (k = 0, z = 0; k < matrixSize; k++)
+                        for (m = 0; m < matrixSize; m++, z++)
+                        {
+                            array1[z] = tmppixel[i - gap + k, j - gap + m];
+                        }
+                    array1 = SortArray(array1);
+
+                    transformedPixels[i - gap, j - gap] = array1[array1.Length / 2];
+                }
+            byte[] transformedBytes = new byte[height * stride];
+
+            var bit = 0;
+            for (int x = 0; x < transformedPixels.GetUpperBound(0) + 1; x++)
+                for (int y = 0; y < transformedPixels.GetUpperBound(1) + 1; y++, bit += bytesPerPixel)
+                {
+                    transformedBytes[bit] = (byte)transformedPixels[x, y];
+                    transformedBytes[bit + 1] = (byte)(transformedPixels[x, y] >> 8);
+                    transformedBytes[bit + 2] = (byte)(transformedPixels[x, y] >> 16);
+                    transformedBytes[bit + 3] = (byte)(transformedPixels[x, y] >> 24);
+                }
+
+            displayedSourceBitmap = BitmapSource.Create(width, height, displayedSourceBitmap.DpiX,
+                displayedSourceBitmap.DpiY, displayedSourceBitmap.Format, null, transformedBytes, stride);
+            image.Source = displayedSourceBitmap;
+        }
+        private int[] SortArray(int[] arr)
+        {
+            int temp;
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                for (int j = i + 1; j < arr.Length; j++)
+                {
+                    if (arr[i] > arr[j])
+                    {
+                        temp = arr[i];
+                        arr[i] = arr[j];
+                        arr[j] = temp;
+                    }
+                }
+            }
+            return arr;
         }
     }
 }
